@@ -10,6 +10,7 @@
     "@oclif/errors": "^1",
     "@salesforce/command": "^1.4.1",
     "@salesforce/core": "^1.3.2",
+    "json2csv": "^4.3.5",
     "tslib": "^1"
   },
   "devDependencies": {
@@ -46,8 +47,11 @@
     "commands": "./lib/commands",
     "bin": "sfdx",
     "topics": {
-      "hello": {
-        "description": "Commands to say hello."
+      "sdoc:object": {
+        "description": "object commands."
+      },
+      "sdoc:mdapi": {
+        "description": "mdapi commands."
       }
     },
     "devPlugins": [
@@ -56,8 +60,10 @@
   },
   "repository": "salesforcedoc/sdoc-sfdx-plugins",
   "scripts": {
+    "clean": "rm -f oclif.manifest.json",
     "postpack": "rm -f oclif.manifest.json",
-    "posttest": "tslint -p test -t stylish",
+    "posttest": "echo 'tslint -p test -t stylish'",
+    "prepare": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "prepack": "rm -rf lib && tsc -b && oclif-dev manifest && oclif-dev readme",
     "test": "nyc --extension .ts mocha --forbid-only \"test/**/*.test.ts\"",
     "version": "oclif-dev readme && git add README.md"

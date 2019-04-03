@@ -1,9 +1,10 @@
 'use strict';
 
 // derived from json2csv/utils/TablePrinter
-// modified to support embedded delimiters
+// - modify to support embedded delimiters (wip)
+// - adjust column sizes for pretty (tbd)
 
-const MIN_CELL_WIDTH = 40;
+const MIN_CELL_WIDTH = 20;
 
 class TablePrinter {
   constructor(opts) {
@@ -41,7 +42,7 @@ class TablePrinter {
   setColumnWidths(line) {
     this.colWidths = line
       .split(this.opts.delimiter)
-      .map(elem => Math.max(elem.length * 5, MIN_CELL_WIDTH));
+      .map(elem => Math.max(elem.length * 3, MIN_CELL_WIDTH));
 
     this.topLine = `┌${this.colWidths.map(i => '─'.repeat(i)).join('┬')}┐`;
     this.middleLine = `├${this.colWidths.map(i => '─'.repeat(i)).join('┼')}┤`;

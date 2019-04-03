@@ -68,7 +68,6 @@ export default class ObjectFieldDescribe extends SfdxCommand {
       sdocOutput(this, { fields: ['objectName', 'fieldName', 'uniqueName', 'label', 'required', 'type'] }, jsonResponse);
     } else {
       sdocOutput(this, { fields: ['objectName', 'fieldName', 'uniqueName', 'label', 'required', 'type', 'extended'] }, jsonResponse);
-    
     }
     return jsonResponse;
 
@@ -80,7 +79,7 @@ export default class ObjectFieldDescribe extends SfdxCommand {
         return `${field.type}(${field.precision}.${field.scale})${req}`;
       } else if (field.type === 'reference') {
         return `lookup(${field.referenceTo})${req}`;
-      } else if (field.type === 'picklist' || field.type === 'multipicklist ') {
+      } else if (field.type === 'picklist' || field.type === 'multipicklist') {
         return `${field.type}${req}`;
       } else {
         return `${field.type}${req}`;

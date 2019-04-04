@@ -6,12 +6,11 @@ A bunch of sfdx commands that evolved from bash scripts that I've been using wit
 Props to [Shane McLaughlin](https://github.com/mshanemc) for giving me the kick in the pants to drop bash and learn TS for this plugin.  If you haven't checked it out already, he's already got a fantastic set of commands in his [sfdx plugin](https://github.com/mshanemc/shane-sfdx-plugins).
 
 <!-- toc -->
-* [Install] (#install)
-* [Usage] (#usage)
-* [Commands] (#commands)
-* [History] (#history)
-* [Roadmap] (#roadmap)
-* [Builds] (#builds)
+* [Usage](#usage)
+* [Commands](#commands)
+* [History](#history)
+* [Roadmap](#roadmap)
+* [Builds](#builds)
 <!-- tocstop -->
 <!-- install -->
 # Usage

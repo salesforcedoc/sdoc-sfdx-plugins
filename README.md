@@ -30,11 +30,35 @@ USAGE
 ```
 <!-- usagestop -->
 <!-- commands -->
+* [`sfdx sdoc:git:clone -a <string> -s <string> -r <string> -d [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocgitclone--a-string--s-string--r-string--d---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:count [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectcount--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:field:describe [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectfielddescribe--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:list [-o <string>] [-e] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectlist--o-string--e--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:sharingstats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectsharingstats--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:stats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectstats--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
+
+## `sfdx sdoc:git:clone -a <string> -s <string> -r <string> -d [--json] [--loglevel trace|debug|info|warn|error|fatal]`
+
+clones a repo
+
+```
+USAGE
+  $ sfdx sdoc:git:clone -a <string> -s <string> -r <string> -d [--json] [--loglevel trace|debug|info|warn|error|fatal]
+
+OPTIONS
+  -a, --auth=auth                                 (required) git username:access token
+  -d, --shallow                                   (required) shallow copy (faster)
+  -r, --repository=repository                     (required) repository location
+  -s, --server=server                             (required) [default: https://github.com] git server url
+  --json                                          format output as json
+  --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
+
+EXAMPLE
+  sfdx sdoc:git:clone --auth username:token --server github.com --repository xxxx/repository.git --shallow
+        // performs a shallow git clone from https://github.com/xxx/repository.git
+```
+
+_See code: [src/commands/sdoc/git/clone.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/git/clone.ts)_
 
 ## `sfdx sdoc:object:count [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 

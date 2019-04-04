@@ -1,0 +1,15 @@
+{
+  "extends": "./node_modules/@salesforce/dev-config/tsconfig",
+  "compilerOptions": {
+    "lib" : ["dom", "es2018"],
+    "outDir": "./lib",
+    "rootDir": "./src",
+    "baseUrl": "./",
+    "paths" : {
+      "*" : ["./node_modules/@salesforce/core/typings/*"]
+    }
+  },
+  "include": [
+    "./src/**/*"
+  ]
+}

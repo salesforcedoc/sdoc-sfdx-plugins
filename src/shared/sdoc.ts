@@ -1,5 +1,10 @@
 import { QueryResult, SObjectResult } from './sdocTypeDefs';
 import { Parser } from 'json2csv';
+// import chalk from 'chalk';
+import child_process = require('child_process');
+import util = require('util');
+const exec = util.promisify(child_process.exec);
+
 const os = require('os');
 const sdocTablePrinter = require('./sdocTablePrinter');
 
@@ -153,4 +158,19 @@ function formatDateString(dateString) {
     return dateString.replace(/T/gi, ' ').replace(/.000\+0000/gi, '');
 }
 
-export { getSObjectRowCount, getSObjectShareCount, getSObjectFirstCreated, getSObjectLastCreated, getSObjectLastModified, getSObjectList, getNamespace, formatDateString, logOutput };
+function basename(path) {
+    return path.split('/').reverse()[0];
+}
+
+async function execute(cmd, execCommand) {
+    try {
+        cmd.ux.log('> ' + execCommand);
+        var execResult = await exec(execCommand);
+    } catch (e) {
+        //cmd.ux.error(chalk.red(e));
+        throw new Error(e);
+    }
+    cmd.ux.log(execResult.stdout);
+}
+
+export { getSObjectRowCount, getSObjectShareCount, getSObjectFirstCreated, getSObjectLastCreated, getSObjectLastModified, getSObjectList, getNamespace, formatDateString, logOutput, basename, execute };

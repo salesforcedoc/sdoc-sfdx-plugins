@@ -4,14 +4,14 @@ const sdoc = require('../../../shared/sdoc');
 
 export default class ObjectList extends SfdxCommand {
 
-  public static description = 'return a list of objects';
+  public static description = 'list all objects';
 
   public static examples = [
     `$ sfdx sdoc:object:list --objecttype all|standard|custom|system --targetusername alias|user -r csv|json|human
-  // returns a list of sobject names
+     // list all sobject names
 `,
     `$ sfdx sdoc:object:list --objecttype all|standard|custom|system --extended --targetusername alias|user -r csv|json|human
-  // returns a list of sobject names with extended information
+     // list all sobject names with extended information
 `
   ];
 

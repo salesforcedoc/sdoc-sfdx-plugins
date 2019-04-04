@@ -39,7 +39,7 @@ USAGE
 
 ## `sfdx sdoc:git:clone -a <string> -s <string> -r <string> -d [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
-clones a repo
+performs a shallow git clone
 
 ```
 USAGE
@@ -55,14 +55,14 @@ OPTIONS
 
 EXAMPLE
   sfdx sdoc:git:clone --auth username:token --server github.com --repository xxxx/repository.git --shallow
-        // performs a shallow git clone from https://github.com/xxx/repository.git
+        // performs a shallow git clone for a repository
 ```
 
 _See code: [src/commands/sdoc/git/clone.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/git/clone.ts)_
 
 ## `sfdx sdoc:object:count [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
-return the row count for some object
+display the row count for an object
 
 ```
 USAGE
@@ -86,7 +86,7 @@ _See code: [src/commands/sdoc/object/count.ts](https://github.com/salesforcedoc/
 
 ## `sfdx sdoc:object:field:describe [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
-return the row count for some object
+describe fields for an object
 
 ```
 USAGE
@@ -110,7 +110,7 @@ _See code: [src/commands/sdoc/object/field/describe.ts](https://github.com/sales
 
 ## `sfdx sdoc:object:list [-o <string>] [-e] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
-return a list of objects
+list all objects
 
 ```
 USAGE
@@ -128,18 +128,18 @@ OPTIONS
 
 EXAMPLES
   $ sfdx sdoc:object:list --objecttype all|standard|custom|system --targetusername alias|user -r csv|json|human
-     // returns a list of sobject names
+        // list all sobject names
 
   $ sfdx sdoc:object:list --objecttype all|standard|custom|system --extended --targetusername alias|user -r 
   csv|json|human
-     // returns a list of sobject names with extended information
+        // list all sobject names with extended information
 ```
 
 _See code: [src/commands/sdoc/object/list.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/object/list.ts)_
 
 ## `sfdx sdoc:object:sharingstats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
-return the row count for some object
+display the sharing stats for an object share
 
 ```
 USAGE
@@ -163,7 +163,7 @@ _See code: [src/commands/sdoc/object/sharingstats.ts](https://github.com/salesfo
 
 ## `sfdx sdoc:object:stats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
-return the row count for some object
+display the stats for an object
 
 ```
 USAGE

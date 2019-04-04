@@ -6,11 +6,11 @@ import * as fs from 'fs';
 
 export default class GitClone extends SfdxCommand {
 
-  public static description = 'clones a repo';
+  public static description = 'performs a shallow git clone';
 
   public static examples = [
     `sfdx sdoc:git:clone --auth username:token --server github.com --repository xxxx/repository.git --shallow
-     // performs a shallow git clone from https://github.com/xxx/repository.git
+     // performs a shallow git clone for a repository
 `
   ];
 

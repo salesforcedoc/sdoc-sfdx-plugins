@@ -3,7 +3,7 @@ const sdoc = require('../../../../shared/sdoc');
 
 export default class ObjectFieldDescribe extends SfdxCommand {
 
-  public static description = 'return the row count for some object';
+  public static description = 'describe fields for an object';
 
   public static examples = [
     `$ sfdx sdoc:object:field:describe --object object --targetusername alias|user -r csv|json|human
@@ -17,7 +17,7 @@ export default class ObjectFieldDescribe extends SfdxCommand {
   };
 
   protected static requiresUsername = true;
-  // protected static supportsDevhubUsername = true;
+  // protected static supportsDevhubUsername = false;
   // protected static requiresProject = false;
 
   public async run(): Promise<any> { // tslint:disable-line:no-any

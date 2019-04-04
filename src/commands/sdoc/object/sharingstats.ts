@@ -4,7 +4,7 @@ const sdoc = require('../../../shared/sdoc');
 
 export default class ObjectSharingstats extends SfdxCommand {
 
-  public static description = 'return the row count for some object';
+  public static description = 'display the sharing stats for an object share';
 
   public static examples = [
     `$ sfdx sdoc:object:sharingstats --object objectName --targetusername alias|user -r csv|json|human

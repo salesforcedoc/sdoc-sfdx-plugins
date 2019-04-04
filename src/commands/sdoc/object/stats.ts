@@ -4,7 +4,7 @@ const sdoc = require('../../../shared/sdoc');
 
 export default class ObjectStats extends SfdxCommand {
 
-  public static description = 'return the row count for some object';
+  public static description = 'display the stats for an object';
 
   public static examples = [
     `$ sfdx sdoc:object:stats --object objectName --targetusername alias|user -r csv|json|human

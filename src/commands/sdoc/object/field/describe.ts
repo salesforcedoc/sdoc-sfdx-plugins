@@ -1,5 +1,5 @@
 import { flags, SfdxCommand } from '@salesforce/command';
-import { sdocOutput } from '../../../../shared/sdocUtils';
+const sdoc = require('../../../../shared/sdoc');
 
 export default class ObjectFieldDescribe extends SfdxCommand {
 
@@ -13,7 +13,7 @@ export default class ObjectFieldDescribe extends SfdxCommand {
 
   protected static flagsConfig = {
     object: flags.string({ char: 'o', description: 'object fields to describe' }),
-    resultformat: flags.string({ char: 'r', default: 'csv', description: 'result format', options: ['human', 'csv', 'json'] })
+    resultformat: flags.string({ char: 'r', default: 'csv', description: 'result format', options: ['csv', 'json', 'human'] })
   };
 
   protected static requiresUsername = true;
@@ -32,7 +32,6 @@ export default class ObjectFieldDescribe extends SfdxCommand {
     // this.ux.logJson(metadata.fields);
 
     const jsonResponse = [];
-
     for (const field of metadata.fields) {
       const rewritten = {
         objectName: `${object}`,
@@ -46,28 +45,11 @@ export default class ObjectFieldDescribe extends SfdxCommand {
       jsonResponse.push(rewritten);
     }
 
-    /*
-    // using cli-ux table > v5.0.0
-    var opts = { csv : (this.flags.resultformat==='csv' ? true : false) }
-    cli.table(jsonResponse, {
-        name: {},
-        label: {},
-        required: {},
-        type: {} 
-        }, opts);
-
-    // using cli-ux table < v5.0.0
-    this.ux.table(
-      output,
-      ['name', 'label', 'required', 'type']
-    );
-    */
-
     // hide extended for now until TablePrinting works
-    if (this.flags.resultformat==='human') {
-      sdocOutput(this, { fields: ['objectName', 'fieldName', 'uniqueName', 'label', 'required', 'type'] }, jsonResponse);
+    if (this.flags.resultformat === 'human') {
+      sdoc.logOutput(this, { fields: ['objectName', 'fieldName', 'uniqueName', 'label', 'required', 'type'] }, jsonResponse);
     } else {
-      sdocOutput(this, { fields: ['objectName', 'fieldName', 'uniqueName', 'label', 'required', 'type', 'extended'] }, jsonResponse);
+      sdoc.logOutput(this, { fields: ['objectName', 'fieldName', 'uniqueName', 'label', 'required', 'type', 'extended'] }, jsonResponse);
     }
     return jsonResponse;
 

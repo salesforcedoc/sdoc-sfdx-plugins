@@ -1,6 +1,5 @@
 import { flags, SfdxCommand } from '@salesforce/command';
-import { QueryResult } from './../../../shared/typeDefs';
-import { sdocOutput } from '../../../shared/sdocUtils';
+const sdoc = require('../../../shared/sdoc');
 // import { AnyJson } from '@salesforce/ts-types';
 
 export default class ObjectStats extends SfdxCommand {
@@ -15,7 +14,7 @@ export default class ObjectStats extends SfdxCommand {
 
   protected static flagsConfig = {
     object: flags.string({ char: 'o', description: 'the object to get stats against' }),
-    resultformat: flags.string({ char: 'r', default: 'csv', description: 'result format', options: ['human', 'csv', 'json'] })
+    resultformat: flags.string({ char: 'r', default: 'csv', description: 'result format', options: ['csv', 'json', 'human'] })
   };
 
   protected static requiresUsername = true;
@@ -33,45 +32,19 @@ export default class ObjectStats extends SfdxCommand {
     const conn = this.org.getConnection();
 
     // get the row count
-    var rowCount = '-';
-    var query = 'select count(Id) from ' + object;
-    try {
-      var results = <QueryResult>await conn.query(query);
-      rowCount = <string>results.records[0].expr0;
-    } catch (e) { }
+    var rowCount = await sdoc.getSObjectRowCount(conn, object);
 
     // get the share count
-    var shareCount = '-';
-    var shareObject = object.replace(/__c/gi, '__');
-    query = 'select count(Id) from ' + shareObject + 'Share';
-    try {
-      results = <QueryResult>await conn.query(query);
-      shareCount = <string>results.records[0].expr0;
-    } catch (e) { }
+    var shareCount = await sdoc.getSObjectShareCount(conn, object);
 
     // get the first created
-    var firstCreated = '-';
-    query = 'select min(createddate) from ' + object;
-    try {
-      results = <QueryResult>await conn.query(query);
-      firstCreated = <string>results.records[0].expr0.replace(/T/gi, ' ').replace(/.000\+0000/gi, '');
-    } catch (e) { }
+    var firstCreated = await sdoc.getSObjectFirstCreated(conn, object);
 
     // get the last created
-    var lastCreated = '-';
-    query = 'select max(createddate) from ' + object;
-    try {
-      results = <QueryResult>await conn.query(query);
-      lastCreated = <string>results.records[0].expr0.replace(/T/gi, ' ').replace(/.000\+0000/gi, '');
-    } catch (e) { }
-
+    var lastCreated = await sdoc.getSObjectLastCreated(conn, object);
+    
     // get the last modified
-    var lastModified = '-';
-    query = 'select max(lastmodifieddate) from ' + object;
-    try {
-      results = <QueryResult>await conn.query(query);
-      lastModified = <string>results.records[0].expr0.replace(/T/gi, ' ').replace(/.000\+0000/gi, '');
-    } catch (e) { }
+    var lastModified = await sdoc.getSObjectLastModified(conn, object);
 
     // output
     const jsonResponse = {
@@ -84,7 +57,7 @@ export default class ObjectStats extends SfdxCommand {
     };
 
     // easier to output to csv using this vs this.ux.table
-    sdocOutput(this, { fields: ['objectName', 'rowCount', 'shareCount', 'firstCreated', 'lastCreated', 'lastModified'] }, jsonResponse);
+    sdoc.logOutput(this, { fields: ['objectName', 'rowCount', 'shareCount', 'firstCreated', 'lastCreated', 'lastModified'] }, jsonResponse);
     return jsonResponse;
   }
 }

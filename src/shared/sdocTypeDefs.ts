@@ -1,3 +1,15 @@
+interface SObjectRecord {
+  name: string;
+  keyPrefix: string;
+  custom: boolean;
+  customSetting: boolean;
+}
+
+interface SObjectResult {
+  sobjects: SObjectRecord[];
+}
+
+// everything below was derived from shane-sfdx-plugins
 interface Record {
   attributes: object;
   Id: string;
@@ -9,17 +21,6 @@ interface QueryResult {
   totalSize: number;
   done: boolean;
   records: Record[];
-}
-
-interface SobjectRecord {
-  name: string;
-  keyPrefix: string;
-  custom: boolean;
-  customSetting: boolean;
-}
-
-interface SobjectResult {
-  sobjects: SobjectRecord[];
 }
 
 interface CreateResult {
@@ -91,4 +92,4 @@ interface CDCEvent {
   };
 }
 
-export { Record, QueryResult, SobjectRecord, SobjectResult, CreateResult, CustomLabel, WaveDataSetListResponse, WaveDatasetVersion, CDCEvent };
+export { SObjectRecord, SObjectResult, Record, QueryResult, CreateResult, CustomLabel, WaveDataSetListResponse, WaveDatasetVersion, CDCEvent };

@@ -32,7 +32,8 @@ USAGE
 <!-- commands -->
 * [`sfdx sdoc:object:count [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectcount--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:field:describe [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectfielddescribe--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
-* [`sfdx sdoc:object:list [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectlist--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
+* [`sfdx sdoc:object:list [-o <string>] [-e] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectlist--o-string--e--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
+* [`sfdx sdoc:object:sharingstats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectsharingstats--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:stats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectstats--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 
 ## `sfdx sdoc:object:count [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
@@ -46,7 +47,7 @@ USAGE
 
 OPTIONS
   -o, --object=object                             object to count
-  -r, --resultformat=human|csv|json               [default: csv] result format
+  -r, --resultformat=csv|json|human               [default: csv] result format
   -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
   --apiversion=apiversion                         override the api version used for api requests made by this command
   --json                                          format output as json
@@ -70,7 +71,7 @@ USAGE
 
 OPTIONS
   -o, --object=object                             object fields to describe
-  -r, --resultformat=human|csv|json               [default: csv] result format
+  -r, --resultformat=csv|json|human               [default: csv] result format
   -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
   --apiversion=apiversion                         override the api version used for api requests made by this command
   --json                                          format output as json
@@ -83,29 +84,58 @@ EXAMPLE
 
 _See code: [src/commands/sdoc/object/field/describe.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/object/field/describe.ts)_
 
-## `sfdx sdoc:object:list [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
+## `sfdx sdoc:object:list [-o <string>] [-e] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
 return a list of objects
 
 ```
 USAGE
-  $ sfdx sdoc:object:list [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
+  $ sfdx sdoc:object:list [-o <string>] [-e] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
   trace|debug|info|warn|error|fatal]
 
 OPTIONS
-  -o, --objecttype=standard|custom|internal|all   [default: all] object types to list
-  -r, --resultformat=human|csv|json               [default: csv] result format
+  -e, --extended                                  provides extended information
+  -o, --objecttype=all|standard|custom|system     [default: all] object types to list
+  -r, --resultformat=csv|json|human               [default: csv] result format
+  -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
+  --apiversion=apiversion                         override the api version used for api requests made by this command
+  --json                                          format output as json
+  --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
+
+EXAMPLES
+  $ sfdx sdoc:object:list --objecttype all|standard|custom|system --targetusername alias|user -r csv|json|human
+     // returns a list of sobject names
+
+  $ sfdx sdoc:object:list --objecttype all|standard|custom|system --extended --targetusername alias|user -r 
+  csv|json|human
+     // returns a list of sobject names with extended information
+```
+
+_See code: [src/commands/sdoc/object/list.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/object/list.ts)_
+
+## `sfdx sdoc:object:sharingstats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
+
+return the row count for some object
+
+```
+USAGE
+  $ sfdx sdoc:object:sharingstats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
+  trace|debug|info|warn|error|fatal]
+
+OPTIONS
+  -o, --object=object                             the object to get stats against
+  -r, --resultformat=csv|json|human               [default: csv] result format
   -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
   --apiversion=apiversion                         override the api version used for api requests made by this command
   --json                                          format output as json
   --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
 
 EXAMPLE
-  $ sfdx sdoc:object:list --objecttype all|standard|custom|internal --targetusername alias -r csv|json|human
-       // returns a list of sobject names
+  $ sfdx sdoc:object:sharingstats --object objectName --targetusername alias|user -r csv|json|human
+        // <objectName>,<rowCount>,<shareCount>,<shareRatio>
 ```
 
-_See code: [src/commands/sdoc/object/list.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/object/list.ts)_
+_See code: [src/commands/sdoc/object/sharingstats.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/object/sharingstats.ts)_
 
 ## `sfdx sdoc:object:stats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
@@ -118,7 +148,7 @@ USAGE
 
 OPTIONS
   -o, --object=object                             the object to get stats against
-  -r, --resultformat=human|csv|json               [default: csv] result format
+  -r, --resultformat=csv|json|human               [default: csv] result format
   -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
   --apiversion=apiversion                         override the api version used for api requests made by this command
   --json                                          format output as json

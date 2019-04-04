@@ -1,22 +1,24 @@
 import { flags, SfdxCommand } from '@salesforce/command';
-import { SobjectResult } from '../../../shared/typeDefs';
-import { sdocOutput } from '../../../shared/sdocUtils';
+const sdoc = require('../../../shared/sdoc');
 // import { AnyJson } from '@salesforce/ts-types';
-
 
 export default class ObjectList extends SfdxCommand {
 
   public static description = 'return a list of objects';
 
   public static examples = [
-    `$ sfdx sdoc:object:list --objecttype all|standard|custom|internal --targetusername alias -r csv|json|human
-    // returns a list of sobject names
+    `$ sfdx sdoc:object:list --objecttype all|standard|custom|system --targetusername alias|user -r csv|json|human
+  // returns a list of sobject names
+`,
+    `$ sfdx sdoc:object:list --objecttype all|standard|custom|system --extended --targetusername alias|user -r csv|json|human
+  // returns a list of sobject names with extended information
 `
   ];
 
   protected static flagsConfig = {
-    objecttype: flags.string({ char: 'o', default: 'all', description: 'object types to list', options: ['standard', 'custom', 'internal', 'all'] }),
-    resultformat: flags.string({ char: 'r', default: 'csv', description: 'result format', options: ['human', 'csv', 'json'] })
+    objecttype: flags.string({ char: 'o', default: 'all', description: 'object types to list', options: ['all', 'standard', 'custom', 'system'] }),
+    extended: flags.boolean({ char: 'e', default: false, description: 'provides extended information' }),
+    resultformat: flags.string({ char: 'r', default: 'csv', description: 'result format', options: ['csv', 'json', 'human'] })
   };
 
   protected static requiresUsername = true;
@@ -28,58 +30,44 @@ export default class ObjectList extends SfdxCommand {
     // this.org is guaranteed because requiresUsername=true, as opposed to supportsUsername
     const conn = this.org.getConnection();
 
-    // get a list of internal/setup sobjects from tooling api
-    var toolingResponse = <SobjectResult><unknown>await conn.request({
-      method: 'GET',
-      url: `${conn.baseUrl()}/tooling/sobjects`
-    });
-    const toolingObjects = toolingResponse.sobjects.map(d => d.name);
-    
-    // get a list of all sobjects
-    var sobjectResponse = <SobjectResult><unknown>await conn.request({
-      method: 'GET',
-      url: `${conn.baseUrl()}/sobjects`
-    });
+    // get the sobjectList
+    var jsonResponse = await sdoc.getSObjectList(conn);
 
-    // create a jsonResponse
-    const jsonResponse = sobjectResponse.sobjects.map(function (object) {
-      // logic for what type of object
-      var internalType = toolingObjects.some(x => x === object.name);
-      var ignoreType = (object.name.search(/ViewStat$|VoteStat$|DataCategorySelection$|Tag$|History$|Feed$|Share$|ChangeEvent$/gi)==-1 ? false : true);
-      var objectType = (object.custom ? (object.customSetting ? 'CustomSetting' : (object.name.search(/__mdt$/gi)==-1 ? 'Custom' : 'CustomMetadata')) : 'Standard');
-      var objectNamespace = (object.name.match(/__/gi)!=null && object.name.match(/__/gi).length===2 ? object.name.split('__')[0] : '')
-      const obj = {
-        'objectName': object.name,
-        'type': (internalType ? 'Internal' : (ignoreType ? 'Ignore' : objectType)),
-        'prefix': object.keyPrefix,
-        'namespace': objectNamespace
-      };
-      return obj;
-    });
+    // filter the data
+    if (this.flags.objecttype === 'system') {
+      jsonResponse = jsonResponse.filter(object => { return object.type === 'System'; });
+    } else if (this.flags.objecttype === 'standard') {
+      jsonResponse = jsonResponse.filter(object => { return object.type === 'Standard'; });
+    } else if (this.flags.objecttype === 'custom') {
+      jsonResponse = jsonResponse.filter(object => { return (object.type.search(/^Custom/gi) == -1 ? false : true); });
+    }
 
-    
-    if (this.flags.objecttype === 'all') {
+    if (this.flags.extended) {
 
-      sdocOutput(this, { fields: ['objectName', 'type', 'prefix', 'namespace' ] }, jsonResponse);
-      return jsonResponse;
+      // extended information
+      sdoc.logOutput(this, { fields: ['objectName', 'type', 'prefix', 'namespace'] }, jsonResponse);
 
     } else {
 
-      var filteredResponse = jsonResponse;
-      if (this.flags.objecttype === 'internal') {
-        filteredResponse = jsonResponse.filter(object => { return object.type === 'Internal'; });
-      } else if (this.flags.objecttype === 'standard') {
-        filteredResponse = jsonResponse.filter(object => { return object.type === 'Standard'; });
-      } else if (this.flags.objecttype === 'custom') {
-        filteredResponse = jsonResponse.filter(object => { return (object.type.search(/^Custom/gi)==-1 ? false : true); });
-      }
+      // simple information
+      var simpleResponse = [];
+      simpleResponse = jsonResponse.map(object => object.objectName);
+      jsonResponse = simpleResponse;
 
-      //this.ux.log(namesFromSObjects.toString().replace(/,/gi, ' '));
-      sdocOutput(this, { fields: ['objectName', 'type', 'prefix', 'namespace'] }, filteredResponse);
-      return filteredResponse;
+      if (!this.flags.json) {
+        if (this.flags.resultformat === 'json') {
+          this.ux.logJson(jsonResponse);
+        } else {
+          for (const objectName of jsonResponse) {
+            this.ux.log(objectName);
+          }
+        }
+      }
 
     }
 
-    return;
+    return jsonResponse;
+
   }
+
 }

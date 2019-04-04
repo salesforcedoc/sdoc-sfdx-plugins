@@ -162,10 +162,10 @@ function basename(path) {
     return path.split('/').reverse()[0];
 }
 
-async function execute(cmd, execCommand) {
+async function execute(cmd, execCommand, workingDir = '.') {
     try {
         cmd.ux.log('> ' + execCommand);
-        var execResult = await exec(execCommand);
+        var execResult = await exec(execCommand,{cwd: workingDir});
     } catch (e) {
         //cmd.ux.error(chalk.red(e));
         throw new Error(e);

@@ -188,7 +188,7 @@ _See code: [src/commands/sdoc/object/stats.ts](https://github.com/salesforcedoc/
 
 # History
 <!-- history -->
-It all started in late 2017 with few helpful sfdx commands strung together to make something useful in a bash script or eeks...a batch file.  Over time, those bash scripts played a vital role in the various work I was involved in as a Salesforce architect.  As the number of scripts grew, it was becoming unwieldy to manage and getting it to work for other developers on Windows was became a non-trival effort. By the fall of 2018, I'd realized that at some point, I would need to migrate over as a dx plug-in or just a straight node CLI.  That point would arrive in spring of 2019.  The journey has begun!
+It all started in late 2017 with few helpful sfdx commands strung together to make something useful in a bash script or eeks...a batch file.  Over time, those bash scripts played a vital role in the various work I was involved in as a Salesforce architect.  As the number of scripts grew, it was becoming unwieldy to manage and getting it to work on Windows was a non-trival effort. By the fall of 2018, I'd realized that at some point, I would need to migrate over as a dx plug-in or just a straight node CLI and drop it on github.  That point would finally arrive six months later in spring of 2019.  So hang on, grab some popcorn, sit back or whatever it is that you want to do, the journey has begun!
 
 # Roadmap
 <!-- roadmap -->
@@ -196,13 +196,15 @@ It all started in late 2017 with few helpful sfdx commands strung together to ma
 - Track object/field, metadata customization lifecycle from dev->test->qa->prod
 - Field Trip support/integration
 ## support for Quick Analysis
-- Discover what's items that need rem
+- Quickly discover items that need remediation.
 ## support for Org Snapshots
 - For customers at the beginning their DevOps and CI/CD journey but are struggling to adopt source control.  Within a week, you can get a quick start to having org snapshots of their dev->test->qa->prod pipeline on a periodic basis.
 ## more
 
 # Builds
 <!-- builds -->
+
+Yep these are broken.
 
 [![Version](https://img.shields.io/npm/v/sdoc-sfdx-plugins.svg)](https://npmjs.org/package/sdoc-sfdx-plugins)
 [![CircleCI](https://circleci.com/gh/salesforcedoc/sdoc-sfdx-plugins/tree/master.svg?style=shield)](https://circleci.com/gh/salesforcedoc/sdoc-sfdx-plugins/tree/master)

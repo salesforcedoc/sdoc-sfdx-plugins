@@ -32,9 +32,11 @@ USAGE
 * [`sfdx sdoc:git:clone -a <string> -s <string> -r <string> -d [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocgitclone--a-string--s-string--r-string--d---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:count [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectcount--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:field:describe [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectfielddescribe--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
+* [`sfdx sdoc:object:layout [-o <string>] [-e] [-l] [-f] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectlayout--o-string--e--l--f--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:list [-o <string>] [-e] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectlist--o-string--e--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:sharingstats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectsharingstats--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:stats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectstats--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
+* [`sfdx sdoc:profile:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocprofilelist--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 
 ## `sfdx sdoc:git:clone -a <string> -s <string> -r <string> -d [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
@@ -106,6 +108,36 @@ EXAMPLE
 ```
 
 _See code: [src/commands/sdoc/object/field/describe.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/object/field/describe.ts)_
+
+## `sfdx sdoc:object:layout [-o <string>] [-e] [-l] [-f] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
+
+describe fields for an object
+
+```
+USAGE
+  $ sfdx sdoc:object:layout [-o <string>] [-e] [-l] [-f] [-r <string>] [-u <string>] [--apiversion <string>] [--json] 
+  [--loglevel trace|debug|info|warn|error|fatal]
+
+OPTIONS
+  -e, --extended                                  provides extended information
+  -f, --fieldbylayout                             lists fields by layout
+  -l, --layoutbyfield                             lists layout by field
+  -o, --object=object                             object layouts to describe
+  -r, --resultformat=csv|json|human               [default: csv] result format
+  -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
+  --apiversion=apiversion                         override the api version used for api requests made by this command
+  --json                                          format output as json
+  --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
+
+EXAMPLES
+  $ sfdx sdoc:object:layout --object object --targetusername alias|user -r csv|json|human 
+        // <objectName>,<layoutName>>
+
+  $ sfdx sdoc:object:layout --object object --targetusername alias|user -r csv|json|human --extended
+       // <objectName>,<layoutName>,<fieldName>
+```
+
+_See code: [src/commands/sdoc/object/layout.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/object/layout.ts)_
 
 ## `sfdx sdoc:object:list [-o <string>] [-e] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
@@ -183,6 +215,29 @@ EXAMPLE
 ```
 
 _See code: [src/commands/sdoc/object/stats.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/object/stats.ts)_
+
+## `sfdx sdoc:profile:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
+
+display the row count for an object
+
+```
+USAGE
+  $ sfdx sdoc:profile:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
+  trace|debug|info|warn|error|fatal]
+
+OPTIONS
+  -r, --resultformat=csv|json|human               [default: csv] result format
+  -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
+  --apiversion=apiversion                         override the api version used for api requests made by this command
+  --json                                          format output as json
+  --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
+
+EXAMPLE
+  $ sfdx sdoc:profile:list --type all|standard|guest --targetusername alias|user -r csv|json|human
+        // <objectName>,<rowCount>
+```
+
+_See code: [src/commands/sdoc/profile/list.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/profile/list.ts)_
 <!-- commandsstop -->
 
 # History

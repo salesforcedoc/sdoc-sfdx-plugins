@@ -1,4 +1,4 @@
-import { QueryResult, SObjectResult } from './sdocTypeDefs';
+import { QueryResult, SObjectResponse, ToolingLayoutResponse } from './sdocTypeDefs';
 import { Parser } from 'json2csv';
 // import chalk from 'chalk';
 import child_process = require('child_process');
@@ -7,6 +7,39 @@ const exec = util.promisify(child_process.exec);
 
 const os = require('os');
 const sdocTablePrinter = require('./sdocTablePrinter');
+
+// get profiles
+async function getProfiles(conn): Promise<any> {
+    var returnValue = [];
+    // populate with all profiles and 0
+    var query = 'SELECT Name,UserLicense.Name FROM Profile';
+    try {
+        var response = <QueryResult>await conn.query(query);
+        console.log(JSON.stringify(response));
+        response.records.map(d => {
+            var row = {
+                profileName: d.Name,
+                userLicense: d.UserLicense.Name,
+                count: 0   
+            }
+            returnValue.push(row);
+        });
+    } catch (e) { }
+    query = 'SELECT Profile.Name,Profile.UserLicense.Name UserLicenseName,count(Id) FROM User WHERE IsActive = True group by Profile.Name, Profile.UserLicense.Name';
+    try {
+        var response = <QueryResult>await conn.query(query);
+        response.records.map(d => {
+            var row = {
+                profileName: d.Name,
+                userLicense: d.UserLicenseName,
+                count: d.expr0    
+            }
+            returnValue.forEach(function(item, i) { if (item.profileName == d.Name) returnValue[i] = row;});
+        });
+    } catch (e) { }
+    returnValue = returnValue.sort((n1,n2) => {return n2.count - n1.count;});
+    return returnValue;
+}
 
 // get the row count
 async function getSObjectRowCount(conn, objectName): Promise<any> {
@@ -69,14 +102,14 @@ async function getSObjectLastModified(conn, objectName): Promise<any> {
 async function getSObjectList(conn): Promise<any> {
 
     // get a list of internal/setup sobjects from tooling api
-    var toolingResponse = <SObjectResult><unknown>await conn.request({
+    var toolingResponse = <SObjectResponse><unknown>await conn.request({
         method: 'GET',
         url: `${conn.baseUrl()}/tooling/sobjects`
     });
     const toolingObjects = toolingResponse.sobjects.map(d => d.name);
 
     // get a list of all sobjects
-    var sobjectResponse = <SObjectResult><unknown>await conn.request({
+    var sobjectResponse = <SObjectResponse><unknown>await conn.request({
         method: 'GET',
         url: `${conn.baseUrl()}/sobjects`
     });
@@ -99,6 +132,84 @@ async function getSObjectList(conn): Promise<any> {
 
     return jsonResponse;
 
+}
+
+async function getTableEnumOrId(conn, objectName): Promise<any> {
+
+    var returnValue = objectName;
+
+    // only perform lookup in CustomObject if it has the right prefixes or suffixes eg XXX__objectName__XXX or objectName__XXX
+    if (objectName.match(/__/gi) != null) {
+
+        returnValue = stripNamespaceExtension(objectName);
+        try {
+            // FYI: there are some instances where standard objects show up in this customtable because they store historical data
+            var queryResponse = <QueryResult><unknown>await conn.request({
+                method: 'GET',
+                url: `${conn.baseUrl()}/tooling/query/?q=select+Id,DeveloperName+from+CustomObject+where+DeveloperName=%27${returnValue}%27`
+            });
+            if (queryResponse.size > 0) {
+                returnValue = <string>queryResponse.records[0].Id;
+
+            }
+        } catch (e) { }
+
+    }
+    return returnValue;
+}
+
+async function getLayout(conn, objectName, extended): Promise<any> {
+
+    // need the TableEnumOrId for the tooling api query
+    var TableEnumOrId = await getTableEnumOrId(conn, objectName);
+
+    // get the layout from tooling api
+    var queryResponse = <QueryResult><unknown>await conn.request({
+        method: 'GET',
+        url: `${conn.baseUrl()}/tooling/query/?q=select+id,name+from+layout+where+TableEnumOrId=%27${TableEnumOrId}%27`
+    });
+    //console.log(JSON.stringify(queryResponse));
+
+    // format response
+    var jsonResponse = [];
+    for (const d of queryResponse.records) {
+        //console.log(JSON.stringify(d));
+
+        if (extended) {
+
+            // get the layout
+            var layoutResponse = <ToolingLayoutResponse><unknown>await conn.request({
+                method: 'GET',
+                url: `${d.attributes.url}`
+            });
+            //console.log(JSON.stringify(layoutResponse));
+
+            // output layout fields
+            layoutResponse.Metadata.layoutSections.map(e =>
+                e.layoutColumns.map(f => (f.layoutItems!==null) ? 
+                    f.layoutItems.map(g => {
+                        if (g.emptySpace==null) {
+                            const row = {
+                                'objectName': objectName,
+                                'layoutName': d.Name,
+                                'fieldName': g.field,
+                                'uniqueName': `${objectName}.${g.field}`
+                            };
+                            jsonResponse.push(row);
+                        }
+                    }) : f
+                    ));
+        } else {
+            const row = {
+                'objectName': objectName,
+                'layoutName': d.Name
+            };
+            jsonResponse.push(row);
+        }
+
+    };
+
+    return jsonResponse;
 }
 
 // output the jsonResponse 
@@ -148,9 +259,14 @@ function logOutput(cmd, fields, jsonResponse) {
     }
 }
 
-// get the namespace from the objectname 'XXX__fieldname__c' returns 'XXX'
+// get the namespace from the objectname, 'XXX__fieldname__c' returns 'XXX'
 function getNamespace(objectName) {
     return (objectName.match(/__/gi) != null && objectName.match(/__/gi).length === 2 ? objectName.split('__')[0] : '');
+}
+
+// strip the namespace and extension from the objectname, 'XXX__fieldname__xxx' returns 'fieldname' 
+function stripNamespaceExtension(objectName) {
+    return (objectName.match(/__/gi) != null ? (objectName.match(/__/gi).length === 2 ? objectName.split('__')[1] : (objectName.match(/__/gi).length === 1 ? objectName.split('__')[0] : objectName)) : objectName);
 }
 
 // removes T and +0000 from "2019-04-04T04:20:02+0000" to "2019-04-04 04:20:02"
@@ -165,7 +281,7 @@ function basename(path) {
 async function execute(cmd, execCommand, workingDir = '.') {
     try {
         cmd.ux.log('> ' + execCommand);
-        var execResult = await exec(execCommand,{cwd: workingDir});
+        var execResult = await exec(execCommand, { cwd: workingDir });
     } catch (e) {
         //cmd.ux.error(chalk.red(e));
         throw new Error(e);
@@ -173,4 +289,18 @@ async function execute(cmd, execCommand, workingDir = '.') {
     cmd.ux.log(execResult.stdout);
 }
 
-export { getSObjectRowCount, getSObjectShareCount, getSObjectFirstCreated, getSObjectLastCreated, getSObjectLastModified, getSObjectList, getNamespace, formatDateString, logOutput, basename, execute };
+export { 
+    getProfiles,
+    getLayout, 
+    getSObjectRowCount, 
+    getSObjectShareCount, 
+    getSObjectFirstCreated, 
+    getSObjectLastCreated, 
+    getSObjectLastModified, 
+    getSObjectList, 
+    getNamespace, 
+    formatDateString, 
+    logOutput, 
+    basename, 
+    execute 
+};

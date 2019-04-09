@@ -27,7 +27,6 @@ export default class ProfileList extends SfdxCommand {
 
     // get the row count
     var jsonResponse = await sdoc.getProfiles(conn);
-//this.ux.logJson(jsonResponse);
 
     // easier to output to csv using this vs this.ux.table
     sdoc.logOutput(this, { fields: ['profileName', 'userLicense', 'count'] }, jsonResponse);

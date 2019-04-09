@@ -1,26 +1,68 @@
-interface SObjectRecord {
-  name: string;
-  keyPrefix: string;
-  custom: boolean;
-  customSetting: boolean;
+interface SObjectResponse {
+  sobjects: [
+    {
+      name: string;
+      keyPrefix: string;
+      custom: boolean;
+      customSetting: boolean;
+    }
+  ]
 }
 
-interface SObjectResult {
-  sobjects: SObjectRecord[];
-}
-
-// everything below was derived from shane-sfdx-plugins
-interface Record {
-  attributes: object;
+interface ToolingLayoutResponse {
   Id: string;
-  expr0: string;
-  ContentDocumentId?: string;
+  Name: string;
+  NamespacePrefix: string;
+  LayoutType: string;
+  Metadata: {
+    layoutSections: [{
+      label: string;
+      layoutColumns: [{
+        layoutItems: [{
+            emptySpace: boolean;
+            field: string;
+          }]
+        }]
+      }]
+  }
 }
 
+interface SObjectLayoutResponse {
+  Id: string;
+  Fullname: string;
+}
+
+// for a lot of different queries
 interface QueryResult {
+  // common
+  size: number;
   totalSize: number;
   done: boolean;
-  records: Record[];
+  entityTypeName: string;
+  records: [ {
+    // common
+    Id: string;
+    Name: string;
+    // profile query
+    UserLicense: {
+      Name: string;
+    }
+    // user query
+    UserLicenseName: string;
+    // expr0 - for group by queries, min, max, sum, avg
+    expr0: string;
+    attributes: {
+      // for query on Layout 
+      type: string;
+      url: string;
+    };
+    // for query on Layout 
+    DeveloperName: string;
+    NamespacePrefix: string;
+    SharingModel: string;
+    // for query on Content
+    ContentDocumentId?: string;
+  }];
 }
 
 interface CreateResult {
@@ -92,4 +134,13 @@ interface CDCEvent {
   };
 }
 
-export { SObjectRecord, SObjectResult, Record, QueryResult, CreateResult, CustomLabel, WaveDataSetListResponse, WaveDatasetVersion, CDCEvent };
+export { 
+  SObjectResponse, 
+  ToolingLayoutResponse,
+  SObjectLayoutResponse,
+  QueryResult, 
+  CreateResult, 
+  CustomLabel, 
+  WaveDataSetListResponse, 
+  WaveDatasetVersion, 
+  CDCEvent };

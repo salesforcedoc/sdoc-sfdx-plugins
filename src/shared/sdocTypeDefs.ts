@@ -33,7 +33,7 @@ interface SObjectLayoutResponse {
 }
 
 // for a lot of different queries
-interface QueryResult {
+interface QueryResponse {
   // common
   size: number;
   totalSize: number;
@@ -138,7 +138,7 @@ export {
   SObjectResponse, 
   ToolingLayoutResponse,
   SObjectLayoutResponse,
-  QueryResult, 
+  QueryResponse, 
   CreateResult, 
   CustomLabel, 
   WaveDataSetListResponse, 

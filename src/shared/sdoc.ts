@@ -1,4 +1,4 @@
-import { QueryResult, SObjectResponse, ToolingLayoutResponse } from './sdocTypeDefs';
+import { QueryResponse, SObjectResponse, ToolingLayoutResponse } from './sdocTypeDefs';
 import { Parser } from 'json2csv';
 // import chalk from 'chalk';
 import child_process = require('child_process');
@@ -14,8 +14,7 @@ async function getProfiles(conn): Promise<any> {
     // populate with all profiles and 0
     var query = 'SELECT Name,UserLicense.Name FROM Profile';
     try {
-        var response = <QueryResult>await conn.query(query);
-        console.log(JSON.stringify(response));
+        var response = <QueryResponse>await conn.query(query);
         response.records.map(d => {
             var row = {
                 profileName: d.Name,
@@ -27,7 +26,7 @@ async function getProfiles(conn): Promise<any> {
     } catch (e) { }
     query = 'SELECT Profile.Name,Profile.UserLicense.Name UserLicenseName,count(Id) FROM User WHERE IsActive = True group by Profile.Name, Profile.UserLicense.Name';
     try {
-        var response = <QueryResult>await conn.query(query);
+        var response = <QueryResponse>await conn.query(query);
         response.records.map(d => {
             var row = {
                 profileName: d.Name,
@@ -46,8 +45,8 @@ async function getSObjectRowCount(conn, objectName): Promise<any> {
     var returnValue = '-';
     var query = 'select count(Id) from ' + objectName;
     try {
-        var results = <QueryResult>await conn.query(query);
-        returnValue = <string>results.records[0].expr0;
+        var response = <QueryResponse>await conn.query(query);
+        returnValue = <string>response.records[0].expr0;
     } catch (e) { }
     return returnValue;
 }
@@ -59,8 +58,8 @@ async function getSObjectShareCount(conn, objectName): Promise<any> {
     var shareObject = objectName.replace(/__c/gi, '__');
     var query = 'select count(Id) from ' + shareObject + 'Share';
     try {
-        var results = <QueryResult>await conn.query(query);
-        returnValue = <string>results.records[0].expr0;
+        var response = <QueryResponse>await conn.query(query);
+        returnValue = <string>response.records[0].expr0;
     } catch (e) { }
     return returnValue;
 }
@@ -70,8 +69,8 @@ async function getSObjectFirstCreated(conn, objectName): Promise<any> {
     var returnValue = '-';
     var query = 'select min(createddate) from ' + objectName;
     try {
-        var results = <QueryResult>await conn.query(query);
-        returnValue = formatDateString(results.records[0].expr0);
+        var response = <QueryResponse>await conn.query(query);
+        returnValue = formatDateString(response.records[0].expr0);
     } catch (e) { }
     return returnValue;
 }
@@ -81,8 +80,8 @@ async function getSObjectLastCreated(conn, objectName): Promise<any> {
     var returnValue = '-';
     var query = 'select max(createddate) from ' + objectName;
     try {
-        var results = <QueryResult>await conn.query(query);
-        returnValue = formatDateString(results.records[0].expr0);
+        var response = <QueryResponse>await conn.query(query);
+        returnValue = formatDateString(response.records[0].expr0);
     } catch (e) { }
     return returnValue;
 }
@@ -92,8 +91,8 @@ async function getSObjectLastModified(conn, objectName): Promise<any> {
     var returnValue = '-';
     var query = 'select max(lastmodifieddate) from ' + objectName;
     try {
-        var results = <QueryResult>await conn.query(query);
-        returnValue = formatDateString(results.records[0].expr0);
+        var response = <QueryResponse>await conn.query(query);
+        returnValue = formatDateString(response.records[0].expr0);
     } catch (e) { }
     return returnValue;
 }
@@ -144,12 +143,12 @@ async function getTableEnumOrId(conn, objectName): Promise<any> {
         returnValue = stripNamespaceExtension(objectName);
         try {
             // FYI: there are some instances where standard objects show up in this customtable because they store historical data
-            var queryResponse = <QueryResult><unknown>await conn.request({
+            var response = <QueryResponse><unknown>await conn.request({
                 method: 'GET',
                 url: `${conn.baseUrl()}/tooling/query/?q=select+Id,DeveloperName+from+CustomObject+where+DeveloperName=%27${returnValue}%27`
             });
-            if (queryResponse.size > 0) {
-                returnValue = <string>queryResponse.records[0].Id;
+            if (response.size > 0) {
+                returnValue = <string>response.records[0].Id;
 
             }
         } catch (e) { }
@@ -164,16 +163,14 @@ async function getLayout(conn, objectName, extended): Promise<any> {
     var TableEnumOrId = await getTableEnumOrId(conn, objectName);
 
     // get the layout from tooling api
-    var queryResponse = <QueryResult><unknown>await conn.request({
+    var response = <QueryResponse><unknown>await conn.request({
         method: 'GET',
         url: `${conn.baseUrl()}/tooling/query/?q=select+id,name+from+layout+where+TableEnumOrId=%27${TableEnumOrId}%27`
     });
-    //console.log(JSON.stringify(queryResponse));
 
     // format response
     var jsonResponse = [];
-    for (const d of queryResponse.records) {
-        //console.log(JSON.stringify(d));
+    for (const d of response.records) {
 
         if (extended) {
 
@@ -182,7 +179,6 @@ async function getLayout(conn, objectName, extended): Promise<any> {
                 method: 'GET',
                 url: `${d.attributes.url}`
             });
-            //console.log(JSON.stringify(layoutResponse));
 
             // output layout fields
             layoutResponse.Metadata.layoutSections.map(e =>

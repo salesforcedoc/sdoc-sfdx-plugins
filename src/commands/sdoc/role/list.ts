@@ -7,7 +7,7 @@ export default class RoleList extends SfdxCommand {
 
   public static examples = [
     `$ sfdx sdoc:role:list --targetusername alias|user -r csv|json|human
-     // <roleName>,<parentRoleName>,<activeUserCount>
+     // <roleDepth>,<roleName>,<parentRoleName>,<activeUserCount>,<activeUserPlusCount>,<children>,<isUsed>
   `
   ];
 
@@ -28,7 +28,7 @@ export default class RoleList extends SfdxCommand {
     var jsonResponse = await sdoc.getRoleList(conn);
 
     // easier to output to csv using this vs this.ux.table
-    sdoc.logOutput(this, { fields: ['roleName', 'parentRoleName', 'activeUserCount'] }, jsonResponse);
+    sdoc.logOutput(this, { fields: ['roleDepth', 'roleName', 'parentRoleName', 'activeUserCount', 'activeUserPlusCount', 'children', 'isUsed'] }, jsonResponse);
     return jsonResponse;
 
   }

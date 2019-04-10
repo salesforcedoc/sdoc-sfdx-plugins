@@ -28,7 +28,7 @@ export default class ProfileList extends SfdxCommand {
     var jsonResponse = await sdoc.getProfileList(conn);
 
     // easier to output to csv using this vs this.ux.table
-    sdoc.logOutput(this, { fields: ['profileName', 'licenseName', 'activeUserCount', 'isUsed'] }, jsonResponse);
+    sdoc.logOutput(this, { fields: ['profileName', 'licenseName', 'activeUserCount', 'modifyAllData', 'viewAllData', 'isAdmin', 'isUsed'] }, jsonResponse);
     return jsonResponse;
 
   }

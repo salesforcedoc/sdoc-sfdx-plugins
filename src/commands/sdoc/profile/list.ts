@@ -1,14 +1,13 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 const sdoc = require('../../../shared/sdoc');
-// import { AnyJson } from '@salesforce/ts-types';
 
 export default class ProfileList extends SfdxCommand {
 
-  public static description = 'display the row count for an object';
+  public static description = 'display profiles with active user counts';
 
   public static examples = [
-    `$ sfdx sdoc:profile:list --type all|standard|guest --targetusername alias|user -r csv|json|human
-     // <objectName>,<rowCount>
+    `$ sfdx sdoc:profile:list --targetusername alias|user -r csv|json|human
+     // <profileName>,<licenseName>,<activeUserCount>,<isUsed>
   `
   ];
 
@@ -26,10 +25,10 @@ export default class ProfileList extends SfdxCommand {
     const conn = this.org.getConnection();
 
     // get the row count
-    var jsonResponse = await sdoc.getProfiles(conn);
+    var jsonResponse = await sdoc.getProfileList(conn);
 
     // easier to output to csv using this vs this.ux.table
-    sdoc.logOutput(this, { fields: ['profileName', 'userLicense', 'count'] }, jsonResponse);
+    sdoc.logOutput(this, { fields: ['profileName', 'licenseName', 'activeUserCount', 'isUsed'] }, jsonResponse);
     return jsonResponse;
 
   }

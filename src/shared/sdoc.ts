@@ -23,124 +23,103 @@ async function getRoleList(conn): Promise<any> {
                 portalType: d.PortalType,
                 parentId: d.ParentRoleId,
                 parentRoleName: '',
-                childRoles: 0,
-                childCount: 0,
-                activeUserCount: 0
-            }
-            returnValue.push(row);
-        });
-    } catch (e) { }
-    // debugJson(returnValue);
-
-    // populate parentRoleName
-    returnValue.forEach(function (item, i) {
-        if (item.parentId != null)
-            returnValue[i].parentRoleName = returnValue.find(d => { return d.id == item.parentId; }).roleName;
-    });
-    // debugJson(returnValue);
-
-    // populate childRoles count
-    returnValue.forEach(function (item, i) {
-        // debugJson(returnValue.filter( d => { return d.parentId == item.id; }));
-        returnValue[i].childRoles = returnValue.filter(d => { return d.parentId == item.id; }).length;
-    });
-    // debugJson(returnValue);
-
-    // update activeUserCount
-    query = "select UserRole.Id,count(Id) from User where IsActive=true and UserRole.PortalType not in ('Partner', 'CustomerPortal') group by UserRole.Id";
-    try {
-        var response = <QueryResponse>await conn.query(query);
-        // debugJson(response);
-        response.records.map(d => {
-            // update the count for the array item
-            returnValue.forEach(function (item, i) { if (item.id == d.Id) returnValue[i].activeUserCount = d.expr0; });
-        });
-
-    } catch (e) { }
-    returnValue = returnValue.sort((n1, n2) => { return n2.activeUserCount - n1.activeUserCount; });
-    return returnValue;
-}
-
-// get role list
-// ------------------------------------------------------------------------------------------
-async function getPrunedRoleList(conn): Promise<any> {
-    var returnValue = [];
-
-    // populate with all roles with activeUserCount 0
-    var query = "select Id,Name,PortalType,ParentRoleId from UserRole where PortalType not in ('Partner', 'CustomerPortal')";
-    try {
-        var response = <QueryResponse>await conn.query(query);
-        response.records.map(d => {
-            var row = {
-                id: d.Id,
-                roleName: d.Name,
-                portalType: d.PortalType,
-                parentId: d.ParentRoleId,
-                parentRoleName: '',
-                childRoles: 0,
-                childCount: 0,
+                children: 0,
+                roleDepth: 0,
                 activeUserCount: 0,
+                activeUserPlusCount: 0,
                 isUsed: true,
                 processed: false,
             }
             returnValue.push(row);
         });
-    } catch (e) { }
+    } catch (e) { debugJson(e); }
 
     // populate parentRoleName
-    returnValue.forEach(function (item, i) {
-        if (item.parentId != null)
-            returnValue[i].parentRoleName = returnValue.find(d => { return d.id == item.parentId; }).roleName;
+    returnValue.forEach(item => {
+        if (item.parentId != null) {
+            var row = returnValue.find(d => { return d.id == item.parentId; });
+            if (row) item.parentRoleName = row.roleName;
+        }
     });
+    // debugJson(returnValue);
 
-    // populate childRoles count
-    returnValue.forEach(function (item, i) {
-        returnValue[i].childRoles = returnValue.filter(d => { return d.parentId == item.id; }).length;
+    // populate children
+    returnValue.forEach(item => {
+        item.children = returnValue.filter(d => { return d.parentId == item.id; }).length;
     });
+    // debugJson(returnValue);
 
     // update activeUserCount
     query = "select UserRole.Id,count(Id) from User where IsActive=true and UserRole.PortalType not in ('Partner', 'CustomerPortal') group by UserRole.Id";
     try {
         var response = <QueryResponse>await conn.query(query);
         // debugJson(response);
-        response.records.map(d => {
-            // update the count for the array item
-            returnValue.forEach(function (item, i) { if (item.id == d.Id) returnValue[i].activeUserCount = d.expr0; });
+        returnValue.forEach(item => {
+            var row = response.records.find(d => { return d.Id == item.id; });
+            if (row) { item.activeUserCount = row.expr0; item.activeUserPlusCount = row.expr0; }
         });
-    } catch (e) { }
-    returnValue = returnValue.sort((n1, n2) => { return n2.activeUserCount - n1.activeUserCount; });
+    } catch (e) { debugJson(e); }
 
-    // started a pruned list from roles with no children and no active users
-    var prune = returnValue.filter(d => { return d.childRoles == 0 && d.activeUserCount == 0; });
+    // find roles with no parents (ie. top level)
+    var depth = returnValue.filter(d => { return d.parentId == null; });
 
-    // continue processing until no items remaining
-    while (prune.filter(d => { return d.processed == false; }).length > 0) {
-
-        // check each unprocessed role for new parents to add
-        prune.forEach(function (item, i) {
+    // process list until no items remaining 
+    while (depth.filter(d => { return d.processed == false; }).length > 0) {
+        depth.forEach(item => {
             if (!item.processed) {
-                prune[i].isUsed = false;
-                prune[i].processed = true;
-                // find parents with no active users 
-                var parents = returnValue.filter(d => { return d.id == item.parentId && d.activeUserCount == 0; });
-                parents.forEach(function (parent, j) {
-                    // add parent role if it does not already exist
-                    if (prune.filter(d => { return d.id == parent.id; }).length == 0) {
-                        prune.push(parent);
+                item.processed = true;
+                // find children
+                var children = returnValue.filter(d => { return d.parentId == item.id });
+                children.forEach(child => {
+                    // if not in list add
+                    if (depth.filter(d => { return d.id == child.id; }).length == 0) {
+                        child.roleDepth = item.roleDepth + 1;
+                        depth.push(child);
                     }
                 });
             }
         });
     }
+    // return depth;
 
-    // return prune;
+    // reset processed
+    returnValue.forEach(item => { item.processed = false; });
 
-    // update the master list
-    prune.map(d => {
-        returnValue.forEach(function (item, i) {
-            if (item.id == d.Id) returnValue[i].isUsed = false;
+    // find roles with active users
+    var tally = returnValue.filter(d => { return d.activeUserCount != 0; });
+
+    // process list until no items remaining 
+    while (tally.filter(d => { return d.processed == false; }).length > 0) {
+
+        // sort by depth desc,activeUserCount desc
+        tally = tally.sort((n1, n2) => { return ((n1.roleDepth == n2.roleDepth) ? (n2.activeUserCount - n1.activeUserCount) : (n2.roleDepth - n1.roleDepth)); });
+
+        // process one level each iteration to ensure accurate counts
+        var currentDepth = tally.filter(d => { return d.processed == false; })[0].roleDepth;
+
+        tally.filter(d => { return d.roleDepth == currentDepth && d.processed == false; }).forEach(item => {
+                item.processed = true;
+                // find parent roles and increment
+                var parents = returnValue.filter(d => { return d.id == item.parentId; });
+                parents.forEach(parent => {
+                    parent.activeUserPlusCount = parent.activeUserPlusCount + item.activeUserPlusCount;
+                    // if not in list add
+                    if (tally.filter(d => { return d.id == parent.id; }).length == 0) {
+                        tally.push(parent);
+                    }
+                });
         });
-    });
+    }
+    // return returnValue;
+
+    // reset processed
+    returnValue.forEach(item => { item.processed = false; });
+
+    // set which roles are used
+    returnValue.forEach(item => { item.isUsed = (item.activeUserPlusCount>0); });
+
+    // sort by depth,activeUserCount
+    returnValue = returnValue.sort((n1, n2) => { return ((n2.roleDepth == n1.roleDepth) ? (n2.activeUserCount - n1.activeUserCount) : (n1.roleDepth - n2.roleDepth)); });
 
     return returnValue;
 }
@@ -149,22 +128,25 @@ async function getPrunedRoleList(conn): Promise<any> {
 // ------------------------------------------------------------------------------------------
 async function getProfileList(conn): Promise<any> {
     var returnValue = [];
-    if (returnValue.length>0) debugJson(returnValue);
+    if (returnValue.length > 0) debugJson(returnValue);
     // populate with all profiles with activeUserCount of 0
-    var query = "select Id,Name,UserLicense.Name from Profile";
+    var query = "select Id,Name,UserLicense.Name,PermissionsModifyAllData,PermissionsViewAllData from Profile";
     try {
         var response = <QueryResponse>await conn.query(query);
         response.records.map(d => {
             var row = {
                 id: d.Id,
                 profileName: d.Name,
-                licenseName: (d.UserLicense!=null) ? d.UserLicense.Name : '',
+                licenseName: (d.UserLicense != null) ? d.UserLicense.Name : '',
+                modifyAllData: d.PermissionsModifyAllData,
+                viewAllData: d.PermissionsViewAllData,
+                isAdmin: (d.PermissionsModifyAllData || d.PermissionsViewAllData),
                 activeUserCount: 0,
                 isUsed: false
             }
             returnValue.push(row);
         });
-    } catch (e) { }
+    } catch (e) { debugJson(e); }
     // debugJson(returnValue);
 
     // update activeUserCount
@@ -172,17 +154,19 @@ async function getProfileList(conn): Promise<any> {
     try {
         var response = <QueryResponse>await conn.query(query);
         // debugJson(response);
-        response.records.map(d => {
-            // update the count for the array item
-            returnValue.forEach(function (item, i) {
-                if (item.id == d.Id) {
-                    returnValue[i].activeUserCount = d.expr0;
-                    returnValue[i].isUsed = true;
-                    // debugJson(returnValue[i]);
-                }
-            });
+
+        // populate activeUserCount
+        returnValue.forEach(item => {
+            var row = response.records.find(d => { return d.Id == item.id; });
+            if (row) {
+                item.activeUserCount = row.expr0;
+                item.isUsed = true;
+            }
         });
-    } catch (e) { }
+
+    } catch (e) { debugJson(e); }
+
+    // sort
     returnValue = returnValue.sort((n1, n2) => { return n2.activeUserCount - n1.activeUserCount; });
     return returnValue;
 }
@@ -202,31 +186,24 @@ async function getPermissionSetList(conn): Promise<any> {
                 id: d.Id,
                 permissionSetName: d.Name,
                 permissionSetLabel: d.Label,
-                licenseName: (d.License!=null ? d.License.Name : ''),
+                licenseName: (d.License != null ? d.License.Name : ''),
                 activeUserCount: 0,
                 isUsed: false
             }
             returnValue.push(row);
         });
-    } catch (e) { }
+    } catch (e) { debugJson(e); }
     // debugJson(returnValue);
 
     // update activeUserCount
     query = "select PermissionSet.Id,count(Id) from PermissionSetAssignment where Assignee.isActive=true and PermissionSet.isOwnedByProfile=false group by PermissionSet.Id";
     try {
         var response = <QueryResponse>await conn.query(query);
-        // debugJson(response);
-        response.records.map(d => {
-            // update the count for the array item
-            returnValue.forEach(function (item, i) {
-                // debugJson(item);
-                if (item.id === d.Id) {
-                    returnValue[i].activeUserCount = d.expr0;
-                    returnValue[i].isUsed = true;
-                }
-            });
+        returnValue.forEach(item => {
+            var row = response.records.find(d => { return d.Id == item.id; });
+            if (row) { item.activeUserCount = row.expr0; item.isUsed = true; }
         });
-    } catch (e) { }
+    } catch (e) { debugJson(e); }
     returnValue = returnValue.sort((n1, n2) => { return n2.activeUserCount - n1.activeUserCount; });
     return returnValue;
 }
@@ -503,7 +480,6 @@ async function execute(cmd, execCommand, workingDir = '.') {
 // ------------------------------------------------------------------------------------------
 export {
     getRoleList,
-    getPrunedRoleList,
     getPermissionSetList,
     getProfileList,
     getLayout,

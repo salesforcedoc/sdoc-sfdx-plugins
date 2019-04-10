@@ -1,6 +1,5 @@
 import { flags, SfdxCommand } from '@salesforce/command';
 const sdoc = require('../../../shared/sdoc');
-// import { AnyJson } from '@salesforce/ts-types';
 
 export default class ObjectSharingstats extends SfdxCommand {
 

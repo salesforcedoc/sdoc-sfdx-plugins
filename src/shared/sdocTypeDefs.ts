@@ -43,24 +43,31 @@ interface QueryResponse {
     // common
     Id: string;
     Name: string;
-    // profile query
+
+    // added for PermisssionSet query 
+    Label: string;
+    License: {
+      Name: string;
+    }
+    // added for Profile query
     UserLicense: {
       Name: string;
     }
-    // role query
+    // added for UserRole query
     PortalType: string;
     ParentRoleId: string;
-    // user query
+    // added for User query
     UserRoleId: string;
-    UserLicenseName: string;
-    // expr0 - for group by queries, min, max, sum, avg
+    // expr0,count - for group by queries, min, max, sum, avg
     expr0: string;
+    count: string;
+    // common
     attributes: {
-      // for query on Layout 
+      // added for Layout query
       type: string;
       url: string;
     };
-    // for query on Layout 
+    // added for Layout query
     DeveloperName: string;
     NamespacePrefix: string;
     SharingModel: string;

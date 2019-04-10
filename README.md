@@ -36,7 +36,11 @@ USAGE
 * [`sfdx sdoc:object:list [-o <string>] [-e] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectlist--o-string--e--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:sharingstats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectsharingstats--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:object:stats [-o <string>] [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocobjectstats--o-string--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
+* [`sfdx sdoc:permissionset:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocpermissionsetlist--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 * [`sfdx sdoc:profile:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocprofilelist--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
+* [`sfdx sdoc:role:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocrolelist--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
+* [`sfdx sdoc:role:prune [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocroleprune--r-string--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
+* [`sfdx sdoc:ui [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`](#sfdx-sdocui--u-string---apiversion-string---json---loglevel-tracedebuginfowarnerrorfatal)
 
 ## `sfdx sdoc:git:clone -a <string> -s <string> -r <string> -d [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
@@ -216,9 +220,32 @@ EXAMPLE
 
 _See code: [src/commands/sdoc/object/stats.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/object/stats.ts)_
 
+## `sfdx sdoc:permissionset:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
+
+display permission sets with active user counts
+
+```
+USAGE
+  $ sfdx sdoc:permissionset:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
+  trace|debug|info|warn|error|fatal]
+
+OPTIONS
+  -r, --resultformat=csv|json|human               [default: csv] result format
+  -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
+  --apiversion=apiversion                         override the api version used for api requests made by this command
+  --json                                          format output as json
+  --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
+
+EXAMPLE
+  $ sfdx sdoc:permissionset:list --targetusername alias|user -r csv|json|human
+        // <permissionsetName>,<userLicenceName>,<activeUserCount>,<status>
+```
+
+_See code: [src/commands/sdoc/permissionset/list.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/permissionset/list.ts)_
+
 ## `sfdx sdoc:profile:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
 
-display the row count for an object
+display profiles with active user counts
 
 ```
 USAGE
@@ -233,11 +260,77 @@ OPTIONS
   --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
 
 EXAMPLE
-  $ sfdx sdoc:profile:list --type all|standard|guest --targetusername alias|user -r csv|json|human
-        // <objectName>,<rowCount>
+  $ sfdx sdoc:profile:list --targetusername alias|user -r csv|json|human
+        // <profileName>,<licenseName>,<activeUserCount>
 ```
 
 _See code: [src/commands/sdoc/profile/list.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/profile/list.ts)_
+
+## `sfdx sdoc:role:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
+
+display roles and active user counts
+
+```
+USAGE
+  $ sfdx sdoc:role:list [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
+  trace|debug|info|warn|error|fatal]
+
+OPTIONS
+  -r, --resultformat=csv|json|human               [default: csv] result format
+  -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
+  --apiversion=apiversion                         override the api version used for api requests made by this command
+  --json                                          format output as json
+  --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
+
+EXAMPLE
+  $ sfdx sdoc:role:list --targetusername alias|user -r csv|json|human
+        // <roleName>,<parentRoleName>,<activeUserCount>
+```
+
+_See code: [src/commands/sdoc/role/list.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/role/list.ts)_
+
+## `sfdx sdoc:role:prune [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
+
+display roles with pruneable info (ie. true = no active users and no child roles with no active users)
+
+```
+USAGE
+  $ sfdx sdoc:role:prune [-r <string>] [-u <string>] [--apiversion <string>] [--json] [--loglevel 
+  trace|debug|info|warn|error|fatal]
+
+OPTIONS
+  -r, --resultformat=csv|json|human               [default: csv] result format
+  -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
+  --apiversion=apiversion                         override the api version used for api requests made by this command
+  --json                                          format output as json
+  --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
+
+EXAMPLE
+  $ sfdx sdoc:role:prune --targetusername alias|user -r csv|json|human
+        // <roleName>,<parentRoleName>,<activeUserCount>,<pruneable>
+```
+
+_See code: [src/commands/sdoc/role/prune.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/role/prune.ts)_
+
+## `sfdx sdoc:ui [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]`
+
+start the web ui
+
+```
+USAGE
+  $ sfdx sdoc:ui [-u <string>] [--apiversion <string>] [--json] [--loglevel trace|debug|info|warn|error|fatal]
+
+OPTIONS
+  -u, --targetusername=targetusername             username or alias for the target org; overrides default target org
+  --apiversion=apiversion                         override the api version used for api requests made by this command
+  --json                                          format output as json
+  --loglevel=(trace|debug|info|warn|error|fatal)  [default: warn] logging level for this command invocation
+
+EXAMPLE
+  $ sfdx sdoc:ui --targetusername alias|user
+```
+
+_See code: [src/commands/sdoc/ui.ts](https://github.com/salesforcedoc/sdoc-sfdx-plugins/blob/v0.0.0/src/commands/sdoc/ui.ts)_
 <!-- commandsstop -->
 
 # History

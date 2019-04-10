@@ -50,6 +50,16 @@ interface QueryResponse {
       Name: string;
     }
     // added for Profile query
+    PermissionsApiEnabled: boolean;
+    PermissionsApiUserOnly: boolean;
+    PermissionsIsSsoEnabled: boolean;
+    PermissionsModifyAllData: boolean;
+    PermissionsModifyMetadata: boolean;
+    PermissionsViewAllActivities: boolean;
+    PermissionsViewAllData: boolean;
+    PermissionsManageUsers: boolean;
+    PermissionsViewAllUsers: boolean;
+    PermissionsResetPasswords: boolean;
     UserLicense: {
       Name: string;
     }
